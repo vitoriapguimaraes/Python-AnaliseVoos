@@ -1,0 +1,8 @@
+Criar requirements
+conda env export > environment.yml
+
+Recriar o ambiente
+conda env create -f environment.yml
+
+Atualizar ambiente
+conda env update -f environment.yml --prune
