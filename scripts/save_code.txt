@@ -1,0 +1,211 @@
+def validate_merge_integrity(df_main, df_airline_dict, df_dot_dict):
+    """
+    Valida se todos os códigos do dataset principal existem nos dicionários.
+    
+    Args:
+        df_main (pd.DataFrame): Dataset principal de voos
+        df_airline_dict (pd.DataFrame): Dicionário de códigos airline
+        df_dot_dict (pd.DataFrame): Dicionário de códigos DOT
+    
+    Returns:
+        dict: Relatório de validação
+    """
+    
+    print("\n=== VALIDAÇÃO DE INTEGRIDADE DOS CÓDIGOS ===\n")
+    
+    validation_report = {}
+    
+    # 1. VALIDAÇÃO DOT_CODE
+    print("1. Validando DOT_CODE...")
+    
+    # Códigos únicos no dataset principal
+    main_dot_codes = set(df_main['DOT_CODE'].dropna().unique())
+    dict_dot_codes = set(df_dot_dict['Code'].dropna().unique())
+    
+    # Códigos não encontrados no dicionário
+    missing_dot_codes = main_dot_codes - dict_dot_codes
+    extra_dict_codes = dict_dot_codes - main_dot_codes
+    
+    print(f"  Códigos no dataset principal: {len(main_dot_codes):,}")
+    print(f"  Códigos no dicionário: {len(dict_dot_codes):,}")
+    print(f"  Códigos não encontrados no dicionário: {len(missing_dot_codes)}")
+    print(f"  Códigos extras no dicionário: {len(extra_dict_codes)}")
+    
+    if missing_dot_codes:
+        print(f"  ⚠️  CÓDIGOS FALTANDO: {sorted(list(missing_dot_codes))}")
+    else:
+        print("  ✅ Todos os DOT_CODE encontrados no dicionário!")
+    
+    validation_report['dot_codes'] = {
+        'main_unique': len(main_dot_codes),
+        'dict_unique': len(dict_dot_codes),
+        'missing_in_dict': list(missing_dot_codes),
+        'extra_in_dict': list(extra_dict_codes),
+        'coverage': len(main_dot_codes - missing_dot_codes) / len(main_dot_codes) * 100
+    }
+    
+    # 2. VALIDAÇÃO AIRLINE_CODE
+    print(f"\n2. Validando AIRLINE_CODE...")
+    
+    # Códigos únicos no dataset principal
+    main_airline_codes = set(df_main['AIRLINE_CODE'].dropna().unique())
+    dict_airline_codes = set(df_airline_dict['Code'].dropna().unique())
+    
+    # Códigos não encontrados no dicionário
+    missing_airline_codes = main_airline_codes - dict_airline_codes
+    extra_dict_airline_codes = dict_airline_codes - main_airline_codes
+    
+    print(f"  Códigos no dataset principal: {len(main_airline_codes):,}")
+    print(f"  Códigos no dicionário: {len(dict_airline_codes):,}")
+    print(f"  Códigos não encontrados no dicionário: {len(missing_airline_codes)}")
+    print(f"  Códigos extras no dicionário: {len(extra_dict_airline_codes)}")
+    
+    if missing_airline_codes:
+        print(f"  ⚠️  CÓDIGOS FALTANDO: {sorted(list(missing_airline_codes))}")
+    else:
+        print("  ✅ Todos os AIRLINE_CODE encontrados no dicionário!")
+    
+    validation_report['airline_codes'] = {
+        'main_unique': len(main_airline_codes),
+        'dict_unique': len(dict_airline_codes),
+        'missing_in_dict': list(missing_airline_codes),
+        'extra_in_dict': list(extra_dict_airline_codes),
+        'coverage': len(main_airline_codes - missing_airline_codes) / len(main_airline_codes) * 100
+    }
+    
+    return validation_report
+
+def perform_enhanced_merge(df_main, df_airline_dict, df_dot_dict, validate_first=True):
+    """
+    Realiza merge otimizado com validação opcional.
+    
+    Args:
+        df_main (pd.DataFrame): Dataset principal
+        df_airline_dict (pd.DataFrame): Dicionário airline
+        df_dot_dict (pd.DataFrame): Dicionário DOT
+        validate_first (bool): Se deve validar antes do merge
+    
+    Returns:
+        pd.DataFrame: Dataset com merge completo
+    """
+    
+    if validate_first:
+        validation_report = validate_merge_integrity(df_main, df_airline_dict, df_dot_dict)
+    
+    print(f"\n=== REALIZANDO MERGE ===\n")
+    
+    # Fazer cópia para não alterar o original
+    df_merged = df_main.copy()
+    
+    # 1. MERGE COM DOT_CODE
+    print("1. Merge com DOT Dictionary...")
+    before_rows = len(df_merged)
+    
+    df_merged = df_merged.merge(
+        df_dot_dict, 
+        left_on='DOT_CODE', 
+        right_on='Code',
+        how='left'  # Mantém todos os registros do dataset principal
+    )
+    
+    # Remove coluna duplicada
+    df_merged = df_merged.drop('Code', axis=1)
+    
+    after_rows = len(df_merged)
+    print(f"  Linhas antes: {before_rows:,}")
+    print(f"  Linhas depois: {after_rows:,}")
+    
+    if after_rows != before_rows:
+        print(f"  ⚠️  Mudança no número de linhas!")
+    
+    # 2. MERGE COM AIRLINE_CODE
+    print(f"\n2. Merge com Airline Dictionary...")
+    before_rows = len(df_merged)
+    
+    df_merged = df_merged.merge(
+        df_airline_dict,
+        left_on='AIRLINE_CODE',
+        right_on='Code',
+        how='left'
+    )
+    
+    # Remove coluna duplicada
+    df_merged = df_merged.drop('Code', axis=1)
+    
+    after_rows = len(df_merged)
+    print(f"  Linhas antes: {before_rows:,}")
+    print(f"  Linhas depois: {after_rows:,}")
+    
+    if after_rows != before_rows:
+        print(f"  ⚠️  Mudança no número de linhas!")
+    
+    # 3. VERIFICAÇÃO PÓS-MERGE
+    print(f"\n3. Verificação pós-merge...")
+    
+    # Verifica valores nulos nas novas colunas
+    dot_nulls = df_merged['DOT_Description'].isnull().sum()
+    airline_nulls = df_merged['AIRLINE_Description'].isnull().sum()
+    
+    print(f"  DOT_Description nulos: {dot_nulls:,} ({dot_nulls/len(df_merged)*100:.2f}%)")
+    print(f"  AIRLINE_Description nulos: {airline_nulls:,} ({airline_nulls/len(df_merged)*100:.2f}%)")
+    
+    if dot_nulls == 0 and airline_nulls == 0:
+        print("  ✅ Merge completamente bem-sucedido!")
+    elif dot_nulls > 0 or airline_nulls > 0:
+        print("  ⚠️  Alguns códigos não foram encontrados nos dicionários")
+    
+    return df_merged
+
+def generate_merge_summary(df_original, df_merged, validation_report):
+    """Gera resumo completo do processo de merge"""
+    
+    print(f"\n" + "="*50)
+    print("RESUMO FINAL DO MERGE")
+    print("="*50)
+    
+    print(f"\n📊 ESTATÍSTICAS GERAIS:")
+    print(f"  Dataset original: {len(df_original):,} linhas, {len(df_original.columns)} colunas")
+    print(f"  Dataset final: {len(df_merged):,} linhas, {len(df_merged.columns)} colunas")
+    print(f"  Colunas adicionadas: {len(df_merged.columns) - len(df_original.columns)}")
+    
+    print(f"\n🔍 COBERTURA DOS CÓDIGOS:")
+    print(f"  DOT_CODE: {validation_report['dot_codes']['coverage']:.1f}% de cobertura")
+    print(f"  AIRLINE_CODE: {validation_report['airline_codes']['coverage']:.1f}% de cobertura")
+    
+    # Uso de memória
+    mem_original = df_original.memory_usage(deep=True).sum() / 1024**2
+    mem_merged = df_merged.memory_usage(deep=True).sum() / 1024**2
+    
+    print(f"\n💾 USO DE MEMÓRIA:")
+    print(f"  Original: {mem_original:.2f} MB")
+    print(f"  Final: {mem_merged:.2f} MB")
+    print(f"  Aumento: {mem_merged - mem_original:.2f} MB ({((mem_merged - mem_original) / mem_original * 100):+.1f}%)")
+
+# EXEMPLO DE USO COMPLETO
+if __name__ == "__main__":
+    
+    # 1. OTIMIZAR TIPOS DOS DICIONÁRIOS
+    df_AirlineCodeDictionary_opt, df_DotCodeDictionary_opt = optimize_dictionary_types(
+        df_AirlineCodeDictionary, df_DotCodeDictionary
+    )
+    
+    # 2. VALIDAR E REALIZAR MERGE
+    validation_report = validate_merge_integrity(
+        df_voos202301, df_AirlineCodeDictionary_opt, df_DotCodeDictionary_opt
+    )
+    
+    # 3. REALIZAR MERGE OTIMIZADO
+    df_voos_completo = perform_enhanced_merge(
+        df_voos202301, df_AirlineCodeDictionary_opt, df_DotCodeDictionary_opt,
+        validate_first=False  # Já validamos acima
+    )
+    
+    # 4. RESUMO FINAL
+    generate_merge_summary(df_voos202301, df_voos_completo, validation_report)
+    
+    # Atualizar variáveis
+    df_AirlineCodeDictionary = df_AirlineCodeDictionary_opt
+    df_DotCodeDictionary = df_DotCodeDictionary_opt
+    df_voos202301 = df_voos_completo
+    
+    print(f"\n✅ Processamento concluído com sucesso!")
