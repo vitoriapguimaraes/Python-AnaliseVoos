@@ -1,0 +1,48 @@
+# 4. FUNCTION FOR TIME CONVERSION (HHMM to time)
+
+time_columns = [
+    "CRS_DEP_TIME",
+    "DEP_TIME",
+    "WHEELS_OFF",
+    "WHEELS_ON",
+    "CRS_ARR_TIME",
+    "ARR_TIME"
+]
+
+def hhmm_to_time_optimized(val):
+    """
+    Converte um valor HHMM (formato numérico ou string) para um objeto time.
+    Lida com valores inválidos ou NaN, retornando pd.NaT.
+    """
+    # 1. Trata valores nulos (NaN) e valores fora de formato
+    try:
+        if pd.isna(val):
+            return pd.NaT
+        
+        # Converte para int, lidando com floats e strings
+        val = int(float(val))
+    except (ValueError, TypeError):
+        return pd.NaT
+
+    # 2. Valida o valor convertido
+    if not (0 <= val <= 2400):
+        return pd.NaT
+
+    # 3. Extrai horas e minutos
+    hh = val // 100
+    mm = val % 100
+
+    # 4. Valida horas e minutos
+    if not (0 <= hh <= 23 and 0 <= mm <= 59):
+        return pd.NaT
+    
+    # 5. Caso especial: 2400h
+    if val == 2400:
+        return time(0, 0)
+    
+    return time(hh, mm)
+
+# Itera de forma segura, garantindo que a coluna exista
+for col in time_columns:
+    if col in df_flights_optimized.columns:
+        df_flights_optimized[col] = df_flights_optimized[col].apply(hhmm_to_time_optimized)
