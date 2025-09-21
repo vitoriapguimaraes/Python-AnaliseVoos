@@ -1,0 +1,53 @@
+# ============================
+# 7. Risco Relativo
+# ============================
+
+# Exemplo: risco de atraso > 30min em voos noturnos vs diurnos
+df['Atraso_30'] = (df['Atraso_Chegada'] > 30).astype(int)
+
+prob_noite = df[df['Periodo_Dia'] == 'Noite']['Atraso_30'].mean()
+prob_dia = df[df['Periodo_Dia'].isin(['Manhã','Tarde'])]['Atraso_30'].mean()
+risco_relativo = prob_noite / prob_dia
+
+print(f"Risco relativo de atraso >30min (Noite vs Dia): {risco_relativo:.2f}")
+
+# ============================
+# 8. Regressão Linear
+# ============================
+
+## Variável dependente: atraso em minutos
+X = df[['Distancia', 'TaxiOut', 'TaxiIn']]  # exemplo
+y = df['Atraso_Chegada']
+
+model_lin = LinearRegression()
+model_lin.fit(X, y)
+
+print("Coeficientes:", model_lin.coef_)
+print("Intercepto:", model_lin.intercept_)
+print("R²:", model_lin.score(X, y))
+
+# ============================
+# 9. Regressão Logística
+# ============================
+
+## Variável dependente: atraso (binário >15min)
+df['Atraso_Bin'] = (df['Atraso_Chegada'] > 15).astype(int)
+
+X = df[['Distancia', 'TaxiOut', 'TaxiIn']]
+y = df['Atraso_Bin']
+
+model_log = LogisticRegression(max_iter=1000)
+model_log.fit(X, y)
+
+y_pred = model_log.predict(X)
+print(classification_report(y, y_pred))
+
+cm = confusion_matrix(y, y_pred)
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.title("Matriz de Confusão - Regressão Logística")
+plt.xlabel("Previsto")
+plt.ylabel("Real")
+plt.show()
+
+RocCurveDisplay.from_estimator(model_log, X, y)
+plt.show()
