@@ -1,16 +1,4 @@
 # ============================
-# 6. Validação de Hipóteses
-# ============================
-
-# Exemplo: H1 - "Voos noturnos têm mais atraso que voos diurnos"
-noite = df[df['Periodo_Dia'] == 'Noite']['Atraso_Chegada']
-dia = df[df['Periodo_Dia'].isin(['Manhã','Tarde'])]['Atraso_Chegada']
-
-t_stat, p_value = ttest_ind(noite, dia, nan_policy='omit')
-print("Teste t - Voos Noturnos vs Diurnos")
-print(f"t = {t_stat:.2f}, p = {p_value:.4f}")
-
-# ============================
 # 7. Risco Relativo
 # ============================
 
