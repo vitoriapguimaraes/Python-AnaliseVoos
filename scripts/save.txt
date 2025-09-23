@@ -1,15 +1,4 @@
-# ============================
-# 7. Risco Relativo
-# ============================
 
-# Exemplo: risco de atraso > 30min em voos noturnos vs diurnos
-df['Atraso_30'] = (df['Atraso_Chegada'] > 30).astype(int)
-
-prob_noite = df[df['Periodo_Dia'] == 'Noite']['Atraso_30'].mean()
-prob_dia = df[df['Periodo_Dia'].isin(['Manhã','Tarde'])]['Atraso_30'].mean()
-risco_relativo = prob_noite / prob_dia
-
-print(f"Risco relativo de atraso >30min (Noite vs Dia): {risco_relativo:.2f}")
 
 # ============================
 # 8. Regressão Linear
