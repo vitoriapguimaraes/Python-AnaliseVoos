@@ -1,60 +1,90 @@
-# Nome do Projeto
+# Dashboard de Análise de Voos
 
-> Breve descrição do projeto em 2-3 frases, explicando o propósito, motivação e problema que resolve.
+Este projeto apresenta um dashboard interativo desenvolvido em Python utilizando as bibliotecas Dash e Plotly, focado na análise de dados de voos. O objetivo é fornecer uma ferramenta visual e dinâmica para explorar padrões, atrasos, cancelamentos e desvios em operações aéreas, facilitando a identificação de tendências e gargalos.
 
-![Demonstração do sistema](link-para-gif-ou-imagem)
+![Demonstração do sistema](https://via.placeholder.com/800x400?text=Dashboard+de+Voos+em+Ação) <!-- Placeholder para GIF ou imagem real do dashboard -->
 
 ## Funcionalidades Principais
 
-- Liste as principais funcionalidades do projeto.
-- Destaque o que é inovador ou diferencial.
+O dashboard é dividido em três seções principais para uma análise abrangente:
 
-## Resultados e Conclusões
-
-(Quando conter no projeto. Geralmente utilizado para projetos de datascience)
+- **Big Numbers**: Visão geral com as principais métricas de voos, como total de voos, atraso médio, percentual de voos com atraso, cancelados e desviados.
+- **Análise de Distribuições**: Seção interativa que permite ao usuário selecionar uma métrica (Média de Atraso, Quantidade de Atrasos, Quantidade de Cancelamentos, Quantidade de Desvios) e visualizar sua distribuição em relação a diversas categorias, como companhias aéreas, cidades, estados, distância, dia do mês, dia da semana e hora do dia.
+- **Visualização Geográfica**: Um mapa interativo que exibe rotas de voos, com pontos de origem e destino, onde o tamanho e a cor dos pontos podem representar a métrica selecionada, oferecendo insights geográficos sobre as operações.
 
 ## Tecnologias Utilizadas
 
-- Liste as principais tecnologias, frameworks e bibliotecas.
+- **Python**: Linguagem de programação principal.
+- **Dash**: Framework para construção de aplicações web analíticas.
+- **Plotly**: Biblioteca para criação de gráficos interativos e visualizações de dados.
+- **Pandas**: Biblioteca para manipulação e análise de dados.
+- **CSS**: Estilização customizada para um design moderno e responsivo.
 
 ## Como Executar
 
-1. Clone o repositório:
-   ```
-   git clone https://github.com/usuario/repositorio.git
-   ```
-2. Instale as dependências:
-   ```
-   comando de instalação
-   ```
-3. Execute o projeto:
-   ```
-   comando para rodar
-   ```
+Para configurar e executar o dashboard localmente, siga os passos abaixo:
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/seu-repositorio.git
+    cd seu-repositorio
+    ```
+    *(Substitua `seu-usuario/seu-repositorio.git` pelo caminho real do seu repositório)*
+
+2.  **Instale as dependências:**
+    Certifique-se de ter o `pip` instalado. Em seguida, instale as bibliotecas necessárias:
+    ```bash
+    pip install dash plotly pandas
+    ```
+
+3.  **Execute o projeto:**
+    Navegue até o diretório raiz do projeto e execute o arquivo principal da aplicação:
+    ```bash
+    python app.py
+    ```
+
+4.  **Acesse o dashboard:**
+    Após a execução, o dashboard estará disponível no seu navegador. Abra a seguinte URL:
+    ```
+    http://localhost:8050
+    ```
 
 ## Como Usar
 
-- Explique como acessar e testar as principais funcionalidades.
-- Se necessário, inclua exemplos de uso ou prints.
+Ao acessar o dashboard, você encontrará:
+
+-   **Big Numbers**: Na parte superior, um resumo das principais métricas de voos.
+-   **Seleção de Métricas**: Abaixo dos Big Numbers, há quatro botões retangulares (`⏱️ Média de Atraso`, `🔢 Quantidade de Atrasos`, `❌ Quantidade de Cancelamentos`, `🔄 Quantidade de Desvios`). Clique em um deles para alterar a métrica que será visualizada nos gráficos de distribuição e no mapa.
+-   **Gráficos de Distribuição**: Uma série de gráficos de barras e linhas que se atualizam dinamicamente com base na métrica selecionada, mostrando a distribuição por diversas categorias.
+-   **Mapa Geográfico**: Na parte inferior, um mapa interativo que visualiza as rotas de voos e a intensidade da métrica selecionada por localização.
 
 ## Estrutura de Diretórios
 
 ```
-/nome-do-projeto
-├── src/
-├── data/
-├── results/
-└── README.md
+/repo
+├── app.py                 # Aplicação principal Dash
+├── assets/
+│   ├── custom.js          # JavaScript customizado
+│   ├── df_view.csv        # Dataset de exemplo
+│   └── style.css          # Estilos CSS do dashboard
+├── callbacks/
+│   └── chart_callbacks.py # Lógica dos callbacks para atualização dos gráficos
+├── components/
+│   ├── big_numbers.py     # Componente para os cartões de grandes números
+│   ├── charts.py          # Componentes para gráficos e seleção de métricas
+│   ├── header.py          # Componente do cabeçalho
+│   └── layout.py          # Layout principal do dashboard
+├── utils/
+│   └── data_processing.py # Funções de processamento e preparação de dados
+├── LICENSE                # Licença do projeto
+└── README.md              # Este arquivo
 ```
 
 ## Status
 
 - ✅ Concluído
-- 🛠️ Em manutenção
-- 🚧 Em desenvolvimento
-
-> Veja as [issues abertas](https://github.com/usuario/repositorio/issues) para sugestões de melhorias e próximos passos.
 
 ## Mais Sobre Mim
 
 Acesse os arquivos disponíveis na [Pasta Documentos](https://github.com/vitoriapguimaraes/vitoriapguimaraes/tree/main/DOCUMENTOS) para mais informações sobre minhas qualificações e certificações.
+
