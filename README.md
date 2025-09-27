@@ -4,7 +4,7 @@
 
 Desenvolvido em parceria com [Ianna Lise Castro de Paiva](https://github.com/iannacastro).
 
-<!-- ![Demonstração do sistema](https://via.placeholder.com/800x400?text=Dashboard+de+Voos+em+Ação)  Placeholder para GIF ou imagem real do dashboard -->
+![Demonstração do sistema](https://github.com/vitoriapguimaraes/Python-AnaliseVoos/blob/main/project_development/results/display_notebook.gif)
 
 ## Funcionalidades Principais
 
