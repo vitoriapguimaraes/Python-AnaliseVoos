@@ -3,11 +3,27 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from math import atan2, degrees
+from sqlalchemy import create_engine
+import os
 
-def load_and_process_data(filepath):
-    """Carrega e processa os dados"""
-    df = pd.read_csv(filepath)
+def load_and_process_data_from_db():
+    """Carrega dados do banco de dados PostgreSQL"""
+    # Obter a URL do banco da variável de ambiente
+    db_url = os.getenv('DB_URL')
     
+    if not db_url:
+        raise ValueError("DB_URL não encontrada nas variáveis de ambiente")
+    
+    # Criar conexão
+    engine = create_engine(db_url)
+    
+    # Carregar dados da tabela 'flights'
+    print("Conectando ao banco de dados...")
+    query = "SELECT * FROM flights"
+    df = pd.read_sql(query, engine)
+    
+    print(f"Dados carregados do banco: {len(df)} registros")
+
     if 'FL_DATE' in df.columns:
         df['FL_DATE'] = pd.to_datetime(df['FL_DATE'])
     
