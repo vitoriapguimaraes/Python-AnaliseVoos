@@ -2,10 +2,10 @@ import dash
 from dash import dcc, html
 import pandas as pd
 from components.layout import create_layout
-from utils.data_processing import load_and_process_data
+from utils.data_processing import load_and_process_data_from_db
 
-print("Carregando dados...")
-df = load_and_process_data("project_development\dataset\created\df_view.csv")
+print("Carregando dados do banco de dados...")
+df = load_and_process_data_from_db()
 print(f"Dados carregados: {len(df)} registros")
 
 app = dash.Dash(__name__, assets_folder='assets')
