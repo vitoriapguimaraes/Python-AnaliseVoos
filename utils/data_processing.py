@@ -5,11 +5,16 @@ import plotly.graph_objects as go
 from math import atan2, degrees
 from sqlalchemy import create_engine
 import os
+from dotenv import load_dotenv
 
 def load_and_process_data_from_db():
     """Carrega dados do banco de dados PostgreSQL"""
     # Obter a URL do banco da variável de ambiente
     db_url = os.getenv('DB_URL')
+
+    if db_url is None:
+        load_dotenv()  # Carrega variáveis do arquivo .env
+        db_url = os.getenv('DB_URL')
     
     if not db_url:
         raise ValueError("DB_URL não encontrada nas variáveis de ambiente")
