@@ -1,8 +1,10 @@
 # Dashboard de Análise de Voos
 
-Este projeto apresenta um dashboard interativo desenvolvido em Python utilizando as bibliotecas Dash e Plotly, focado na análise de dados de voos. O objetivo é fornecer uma ferramenta visual e dinâmica para explorar padrões, atrasos, cancelamentos e desvios em operações aéreas, facilitando a identificação de tendências e gargalos.
+> Análise aprofundada de padrões problemáticos de voos (Janeiro/2023). O projeto envolveu segmentação de dados, validação de hipóteses, cálculo de risco relativo e aplicação de modelos de regressão para identificar fatores de atraso. Resultado: Dashboard interativo (deploy) e notebook de análise completo.
 
-![Demonstração do sistema](https://via.placeholder.com/800x400?text=Dashboard+de+Voos+em+Ação) <!-- Placeholder para GIF ou imagem real do dashboard -->
+Desenvolvido em parceria com [Ianna Lise Castro de Paiva](https://github.com/iannacastro).
+
+<!-- ![Demonstração do sistema](https://via.placeholder.com/800x400?text=Dashboard+de+Voos+em+Ação)  Placeholder para GIF ou imagem real do dashboard -->
 
 ## Funcionalidades Principais
 
@@ -26,17 +28,17 @@ Para configurar e executar o dashboard localmente, siga os passos abaixo:
 
 1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
+    git clone https://github.com/vitoriapguimaraes/Python-AnaliseVoos
+    cd Python-AnaliseVoos
     ```
-    *(Substitua `seu-usuario/seu-repositorio.git` pelo caminho real do seu repositório)*
 
 2.  **Instale as dependências:**
     Certifique-se de ter o `pip` instalado. Em seguida, instale as bibliotecas necessárias:
     ```bash
-    pip install dash plotly pandas
+    pip install requirements.txt
     ```
 
+> Versão dash
 3.  **Execute o projeto:**
     Navegue até o diretório raiz do projeto e execute o arquivo principal da aplicação:
     ```bash
@@ -48,6 +50,8 @@ Para configurar e executar o dashboard localmente, siga os passos abaixo:
     ```
     http://localhost:8050
     ```
+> Versão em notebook
+5. Configura o **notebook do dashboard** em `project_development/DASHBOARD.ipynb`
 
 ## Como Usar
 
@@ -62,10 +66,10 @@ Ao acessar o dashboard, você encontrará:
 
 ```
 /repo
+├── project_development    # Arquivos notebook do desenvolvimento e resultados das análises
 ├── app.py                 # Aplicação principal Dash
 ├── assets/
 │   ├── custom.js          # JavaScript customizado
-│   ├── df_view.csv        # Dataset de exemplo
 │   └── style.css          # Estilos CSS do dashboard
 ├── callbacks/
 │   └── chart_callbacks.py # Lógica dos callbacks para atualização dos gráficos
@@ -87,4 +91,3 @@ Ao acessar o dashboard, você encontrará:
 ## Mais Sobre Mim
 
 Acesse os arquivos disponíveis na [Pasta Documentos](https://github.com/vitoriapguimaraes/vitoriapguimaraes/tree/main/DOCUMENTOS) para mais informações sobre minhas qualificações e certificações.
-
