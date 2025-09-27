@@ -51,7 +51,7 @@ Para configurar e executar o dashboard localmente, siga os passos abaixo:
     http://localhost:8050
     ```
 > Versão em notebook
-5. Configura o **notebook do dashboard** em `project_development/DASHBOARD.ipynb`
+5. Configura o **notebook do dashboard** em `app_notebook_version.ipynb.ipynb`
 
 ## Como Usar
 
@@ -86,7 +86,7 @@ Ao acessar o dashboard, você encontrará:
 
 ## Status
 
-- ✅ Concluído
+- 🚧 Em desenvolvimento
 
 ## Mais Sobre Mim
 
