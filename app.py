@@ -5,7 +5,8 @@ from components.layout import create_layout
 from utils.data_processing import load_and_process_data
 
 print("Carregando dados...")
-df = load_and_process_data("assets/df_view.csv")
+url = "https://github.com/vitoriapguimaraes/Python-LaboratoriaProjeto4/blob/main/project_development/dataset/created/df_view.csv"
+df = load_and_process_data(url)
 print(f"Dados carregados: {len(df)} registros")
 
 app = dash.Dash(__name__, assets_folder='assets')
