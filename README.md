@@ -66,20 +66,22 @@ Ao acessar o dashboard, você encontrará:
 
 ```
 /repo
-├── project_development    # Arquivos notebook do desenvolvimento e resultados das análises
-├── app.py                 # Aplicação principal Dash
-├── assets/
-│   ├── custom.js          # JavaScript customizado
-│   └── style.css          # Estilos CSS do dashboard
-├── callbacks/
-│   └── chart_callbacks.py # Lógica dos callbacks para atualização dos gráficos
-├── components/
-│   ├── big_numbers.py     # Componente para os cartões de grandes números
-│   ├── charts.py          # Componentes para gráficos e seleção de métricas
-│   ├── header.py          # Componente do cabeçalho
-│   └── layout.py          # Layout principal do dashboard
-├── utils/
-│   └── data_processing.py # Funções de processamento e preparação de dados
+├── app_notebook_version    # Dashboard em versão notebook
+├── project_development/    # Arquivos notebook do desenvolvimento e resultados das análises
+├── app_deploy/
+│   ├── app.py                 # Aplicação principal Dash
+│   ├── assets/
+│   │   ├── custom.js          # JavaScript customizado
+│   │   └── style.css          # Estilos CSS do dashboard
+│   ├── callbacks/
+│   │   └── chart_callbacks.py # Lógica dos callbacks para atualização dos gráficos
+│   ├── components/
+│   │   ├── big_numbers.py     # Componente para os cartões de grandes números
+│   │   ├── charts.py          # Componentes para gráficos e seleção de métricas
+│   │   ├── header.py          # Componente do cabeçalho
+│   │   └── layout.py          # Layout principal do dashboard
+│   └── utils/
+│       └── data_processing.py # Funções de processamento e preparação de dados
 ├── LICENSE                # Licença do projeto
 └── README.md              # Este arquivo
 ```
