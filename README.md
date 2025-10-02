@@ -4,7 +4,7 @@
 
 Desenvolvido em parceria com [Ianna Lise Castro de Paiva](https://github.com/iannacastro).
 
-<!-- ![Demonstração do sistema](https://via.placeholder.com/800x400?text=Dashboard+de+Voos+em+Ação)  Placeholder para GIF ou imagem real do dashboard -->
+![Demonstração do sistema](https://github.com/vitoriapguimaraes/Python-AnaliseVoos/blob/main/project_development/results/display_notebook.gif)
 
 ## Funcionalidades Principais
 
@@ -51,7 +51,7 @@ Para configurar e executar o dashboard localmente, siga os passos abaixo:
     http://localhost:8050
     ```
 > Versão em notebook
-5. Configura o **notebook do dashboard** em `project_development/DASHBOARD.ipynb`
+5. Configura o **notebook do dashboard** em `app_notebook_version.ipynb.ipynb`
 
 ## Como Usar
 
@@ -66,27 +66,29 @@ Ao acessar o dashboard, você encontrará:
 
 ```
 /repo
-├── project_development    # Arquivos notebook do desenvolvimento e resultados das análises
-├── app.py                 # Aplicação principal Dash
-├── assets/
-│   ├── custom.js          # JavaScript customizado
-│   └── style.css          # Estilos CSS do dashboard
-├── callbacks/
-│   └── chart_callbacks.py # Lógica dos callbacks para atualização dos gráficos
-├── components/
-│   ├── big_numbers.py     # Componente para os cartões de grandes números
-│   ├── charts.py          # Componentes para gráficos e seleção de métricas
-│   ├── header.py          # Componente do cabeçalho
-│   └── layout.py          # Layout principal do dashboard
-├── utils/
-│   └── data_processing.py # Funções de processamento e preparação de dados
-├── LICENSE                # Licença do projeto
-└── README.md              # Este arquivo
+├── app_notebook_version        # Dashboard em versão notebook
+├── project_development/        # Arquivos notebook do desenvolvimento e resultados das análises
+├── app_deploy/
+│   ├── app.py                  # Aplicação principal Dash
+│   ├── assets/
+│   │   ├── custom.js           # JavaScript customizado
+│   │   └── style.css           # Estilos CSS do dashboard
+│   ├── callbacks/
+│   │   └── chart_callbacks.py  # Lógica dos callbacks para atualização dos gráficos
+│   ├── components/
+│   │   ├── big_numbers.py      # Componente para os cartões de grandes números
+│   │   ├── charts.py           # Componentes para gráficos e seleção de métricas
+│   │   ├── header.py           # Componente do cabeçalho
+│   │   └── layout.py           # Layout principal do dashboard
+│   └── utils/
+│       └── data_processing.py  # Funções de processamento e preparação de dados
+├── LICENSE
+└── README.md
 ```
 
 ## Status
 
-- ✅ Concluído
+- 🚧 Em desenvolvimento
 
 ## Mais Sobre Mim
 
