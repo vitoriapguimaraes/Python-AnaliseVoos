@@ -1,0 +1,304 @@
+/* Reset e configurações gerais */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f8f9fa;
+  color: #2c3e50;
+}
+
+.main-container {
+  padding: 25px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-title {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Títulos de seção */
+.section-title {
+  color: #34495e;
+  margin-bottom: 25px;
+  font-family: "Arial", sans-serif;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+  font-size: 1.8em;
+}
+
+/* Big Numbers - Layout corrigido */
+.big-numbers-row {
+  text-align: center;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.first-row .big-number-card {
+  flex: 1;
+}
+
+.second-row .big-number-card {
+  flex: 1;
+}
+
+/* Ajuste específico para duas cartas na primeira linha */
+.first-row {
+  justify-content: center;
+}
+
+.first-row .big-number-card {
+  flex: 0 1 calc(50% - 10px);
+  max-width: calc(50% - 10px);
+}
+
+/* Cores dos cards */
+.card-blue {
+  border-left: 4px solid #3498db;
+}
+.card-red {
+  border-left: 4px solid #e74c3c;
+}
+.card-orange {
+  border-left: 4px solid #f39c12;
+}
+.card-cancelled {
+  border-left: 4px solid #e67e22;
+  background-color: #fff5f5;
+  border-color: #fed7d7;
+}
+.card-diverted {
+  border-left: 4px solid #9b59b6;
+  background-color: #f8f5ff;
+  border-color: #e9d8fd;
+}
+
+.card-content {
+  text-align: center;
+}
+
+.card-icon {
+  font-size: 2em;
+  margin: 0 0 10px 0;
+}
+
+.card-value {
+  font-size: 2.2em;
+  margin: 0;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.card-blue .card-value {
+  color: #3498db;
+}
+.card-red .card-value {
+  color: #e74c3c;
+}
+.card-orange .card-value {
+  color: #f39c12;
+}
+.card-cancelled .card-value {
+  color: #e67e22;
+}
+.card-diverted .card-value {
+  color: #9b59b6;
+}
+
+.card-label {
+  font-size: 1.1em;
+  color: #7f8c8d;
+  margin: 8px 0 0 0;
+  font-weight: 500;
+}
+
+/* Gráficos */
+.charts-section {
+  margin-bottom: 40px;
+}
+
+.charts-row {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.chart-column {
+  flex: 1;
+  padding: 12px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.chart-column:hover {
+  transform: scale(1.01);
+}
+
+/* Estilos específicos para o mapa */
+.map-container {
+  margin-top: 40px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.map-container .section-title {
+  border-bottom-color: #27ae60;
+  margin-bottom: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .big-numbers-row {
+    flex-direction: column;
+  }
+
+  .charts-row {
+    flex-direction: column;
+  }
+
+  .main-container {
+    padding: 15px;
+  }
+
+  .header-title {
+    font-size: 2em;
+  }
+
+  .section-title {
+    font-size: 1.5em;
+  }
+}
+
+/* Estilos para os botões de seleção de métrica */
+.metric-selector-wrapper {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.metric-selector-label {
+  font-size: 1.2em;
+  color: #34495e;
+  margin-bottom: 15px;
+  display: block;
+  font-weight: bold;
+}
+
+/* Estilos para os radio buttons - CORRIGIDOS */
+.metric-radio-items {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.metric-radio-items .form-group {
+  display: contents; /* Remove o container padrão do Dash */
+}
+
+.metric-radio-items input[type="radio"] {
+  display: none;
+}
+
+.metric-radio-items label {
+  background: white;
+  padding: 12px 20px;
+  border: 2px solid #bdc3c7;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin: 5px;
+  display: inline-block;
+}
+
+.metric-radio-items label:hover {
+  background: #f8f9fa;
+  border-color: #3498db;
+}
+
+/* ESTILO CORRETO PARA BOTÃO SELECIONADO */
+.metric-radio-items input[type="radio"]:checked + label {
+  background: #3498db !important;
+  color: white !important;
+  border-color: #3498db !important;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Big Numbers Cards Layout */
+.big-numbers-container {
+  margin-bottom: 30px;
+}
+
+.big-numbers-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  justify-content: center;
+}
+
+.big-number-card {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.big-number-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.first-row .big-number-card {
+  flex: 0 1 calc(50% - 10px);
+  max-width: calc(50% - 10px);
+}
+
+.second-row .big-number-card {
+  flex: 0 1 calc(33.333% - 10px);
+  max-width: calc(33.333% - 10px);
+}
+
+.chart-column .js-plotly-plot .plotly {
+  height: 400px !important;
+}
+
+/* Responsividade para radio buttons */
+@media (max-width: 768px) {
+  .metric-radio-items {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .metric-radio-items label {
+    width: 100%;
+    text-align: center;
+  }
+}
