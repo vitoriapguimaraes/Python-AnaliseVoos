@@ -75,7 +75,7 @@ Ao acessar o dashboard, você encontrará:
 
 ## Status
 
-- 🚧 Em desenvolvimento
+- ✅ Concluído
 
 ## Mais Sobre Mim
 
