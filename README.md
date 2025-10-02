@@ -42,16 +42,16 @@ Para configurar e executar o dashboard localmente, siga os passos abaixo:
 3.  **Execute o projeto:**
     Navegue até o diretório raiz do projeto e execute o arquivo principal da aplicação:
     ```bash
-    python app.py
+    streamlit app_streamlit.py
     ```
 
 4.  **Acesse o dashboard:**
     Após a execução, o dashboard estará disponível no seu navegador. Abra a seguinte URL:
     ```
-    http://localhost:8050
+    http://localhost:8051
     ```
 > Versão em notebook
-5. Configura o **notebook do dashboard** em `app_notebook_version.ipynb.ipynb`
+5. Configura o **notebook do dashboard** em `app_notebook_version.ipynb`
 
 ## Como Usar
 
@@ -66,22 +66,9 @@ Ao acessar o dashboard, você encontrará:
 
 ```
 /repo
-├── app_notebook_version        # Dashboard em versão notebook
-├── project_development/        # Arquivos notebook do desenvolvimento e resultados das análises
-├── app_deploy/
-│   ├── app.py                  # Aplicação principal Dash
-│   ├── assets/
-│   │   ├── custom.js           # JavaScript customizado
-│   │   └── style.css           # Estilos CSS do dashboard
-│   ├── callbacks/
-│   │   └── chart_callbacks.py  # Lógica dos callbacks para atualização dos gráficos
-│   ├── components/
-│   │   ├── big_numbers.py      # Componente para os cartões de grandes números
-│   │   ├── charts.py           # Componentes para gráficos e seleção de métricas
-│   │   ├── header.py           # Componente do cabeçalho
-│   │   └── layout.py           # Layout principal do dashboard
-│   └── utils/
-│       └── data_processing.py  # Funções de processamento e preparação de dados
+├── app_streamlit           # Dashboard final para deploy
+├── app_notebook            # Dashboard em versão notebook
+├── project_development/    # Arquivos notebook do desenvolvimento e resultados das análises
 ├── LICENSE
 └── README.md
 ```

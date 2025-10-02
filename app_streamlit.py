@@ -24,14 +24,19 @@ def load_data():
     df["TIME_PERIOD"] = pd.Categorical(df["TIME_PERIOD"], categories=period_order, ordered=True)
     
     # Adicionar colunas para o mapa de rotas, se não existirem
-    if "ORIGIN_LAT" not in df.columns:
-        # Placeholder: Em um cenário real, você carregaria essas coordenadas de outro lugar
-        # ou as calcularia. Para este exemplo, vamos simular.
-        st.warning("Colunas de coordenadas (ORIGIN_LAT, ORIGIN_LON, DEST_LAT, DEST_LON) não encontradas. O mapa pode não funcionar corretamente.")
-        df["ORIGIN_LAT"] = np.random.uniform(25, 50, len(df))
-        df["ORIGIN_LON"] = np.random.uniform(-125, -70, len(df))
-        df["DEST_LAT"] = np.random.uniform(25, 50, len(df))
-        df["DEST_LON"] = np.random.uniform(-125, -70, len(df))
+    required_map_cols = ["ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON", "DISTANCE"]
+    for col in required_map_cols:
+        if col not in df.columns:
+            st.warning(f"Coluna \'{col}\' não encontrada. Gerando dados simulados para o mapa. O mapa pode não funcionar corretamente.")
+            if col == "DISTANCE":
+                df[col] = np.random.randint(50, 2000, len(df))
+            else:
+                df[col] = np.random.uniform(25, 50, len(df)) if "LAT" in col else np.random.uniform(-125, -70, len(df))
+
+    # Adicionar DELAY_PER_DISTANCE para a nova métrica
+    df["DELAY_OVERALL"] = pd.to_numeric(df["DELAY_OVERALL"], errors="coerce")
+    df["DISTANCE"] = pd.to_numeric(df["DISTANCE"], errors="coerce")
+    df["DELAY_PER_DISTANCE"] = df.apply(lambda row: row["DELAY_OVERALL"] / row["DISTANCE"] if row["DISTANCE"] != 0 else 0, axis=1)
 
     return df
 
@@ -66,6 +71,9 @@ def create_metric_data(df, group_col, metric, observed=True):
     elif metric == "diverted_count":
         data = df.groupby(group_col, observed=observed)["DIVERTED"].sum().sort_values(ascending=False)
         title_suffix = "Quantidade de Desvios"
+    elif metric == "avg_delay_per_distance":
+        data = df.groupby(group_col, observed=observed)["DELAY_PER_DISTANCE"].mean().sort_values(ascending=False)
+        title_suffix = "Atraso Médio por Distância (min/milha)"
     else:
         data = df.groupby(group_col, observed=observed)["DELAY_OVERALL"].mean().sort_values(ascending=False)
         title_suffix = "Atraso Médio (min)"
@@ -179,141 +187,266 @@ def create_line_chart_continuous(data, title, x_label, y_label, group_col):
     )
     return fig
 
-def criar_mapa_rotas_avancado(df, top_n=30, altura=600, selected_metric="avg_delay"):
-    metric_config = {
-        "avg_delay": {"col": "DELAY_OVERALL", "agg": "mean", "title": "Atraso Médio", "unit": "min"},
-        "delay_count": {"col": "DELAY", "agg": "sum", "title": "Quantidade de Atrasos", "unit": "voos"},
-        "cancelled_count": {"col": "CANCELLED", "agg": "sum", "title": "Quantidade de Cancelamentos", "unit": "voos"},
-        "diverted_count": {"col": "DIVERTED", "agg": "sum", "title": "Quantidade de Desvios", "unit": "voos"}
+# --- Funções de Mapa (Adaptadas do creating_fig.ipynb) ---
+METRIC_CONFIG = {
+    "avg_delay": {"col": "DELAY_OVERALL", "agg": "mean", "title": "Atraso Médio", "unit": "min"},
+    "delay_count": {"col": "DELAY", "agg": "sum", "title": "Quantidade de Atrasos", "unit": "voos"},
+    "cancelled_count": {"col": "CANCELLED", "agg": "sum", "title": "Quantidade de Cancelamentos", "unit": "voos"},
+    "diverted_count": {"col": "DIVERTED", "agg": "sum", "title": "Quantidade de Desvios", "unit": "voos"},
+    "avg_delay_per_distance": {"col": "DELAY_PER_DISTANCE", "agg": "mean", "title": "Atraso Médio por Distância", "unit": "min/milha"}
+}
+
+def _create_error_figure(message, altura):
+    fig = go.Figure()
+    fig.update_layout(
+        title=dict(text=message, x=0.5, xanchor="center"),
+        height=altura,
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False),
+        template=plotly_template
+    )
+    return fig
+
+def _processar_dados_rotas(df, config, top_n):
+    df_filtered = df.dropna(subset=[config["col"], "ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON", "DISTANCE"])
+    
+    agg_dict = {
+        "DELAY_OVERALL": "mean",
+        "DELAY": "sum",
+        "CANCELLED": "sum",
+        "DIVERTED": "sum",
+        "DELAY_PER_DISTANCE": "mean",
+        "FL_DATE": "count",
+        "TIME_HOUR": "mean"
     }
     
-    config = metric_config[selected_metric]
-    
-    required_cols = ["ORIGIN_CITY", "DEST_CITY", "ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON"]
-    missing_cols = [col for col in required_cols if col not in df.columns]
-    
-    if missing_cols:
-        fig = go.Figure()
-        fig.update_layout(
-            title=f"Dados de coordenadas não disponíveis: {", ".join(missing_cols)}",
-            height=altura,
-            template=plotly_template
-        )
-        return fig
-
     rotas_data = (
-        df.groupby(["ORIGIN_CITY", "DEST_CITY", "ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON"], 
-                           as_index=False)
-        .agg({
-            config["col"]: config["agg"], 
-            "FL_DATE": "count",
-            "TIME_HOUR": "mean"  # Hora média para definir cor
-        })
+        df_filtered.groupby(["ORIGIN_CITY", "DEST_CITY", "ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON", "DISTANCE"], 
+                   as_index=False)
+        .agg(agg_dict)
         .rename(columns={"FL_DATE": "TOTAL_VOOS"})
         .sort_values(by=config["col"], ascending=False)
         .head(top_n)
-        .dropna(subset=["ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON"])
+        .reset_index(drop=True)
     )
     
-    if rotas_data.empty:
-        fig = go.Figure()
-        fig.update_layout(title="Nenhuma rota válida encontrada", height=altura, template=plotly_template)
-        return fig
-    
-    fig = go.Figure()
+    return rotas_data
 
-    min_metric = rotas_data[config["col"]].min()
-    max_metric = rotas_data[config["col"]].max()
-    
-    for _, rota in rotas_data.iterrows():
-        hora_normalizada = rota["TIME_HOUR"] / 23
-        
-        hue = 200 + (hora_normalizada * 20)        
-        saturation = 70 + (hora_normalizada * 30)  
-        lightness = 70 - (hora_normalizada * 50)   
-        
-        cor_hsl = f"hsl({hue}, {saturation}%, {lightness}%)"
-        
-        if max_metric > min_metric:
-            metric_normalizada = (rota[config["col"]] - min_metric) / (max_metric - min_metric)
-            espessura = 1 + (metric_normalizada ** 0.7) * 9  
-        else:
-            espessura = 3
-        
-        espessura = max(1, min(espessura, 10))
+def _adicionar_rotas(fig, rotas_data, espessuras, config):
+    for idx, rota in rotas_data.iterrows():
+        cor = _calcular_cor_horario(rota["TIME_HOUR"])
         
         fig.add_trace(go.Scattergeo(
             lon=[rota["ORIGIN_LON"], rota["DEST_LON"]],
             lat=[rota["ORIGIN_LAT"], rota["DEST_LAT"]],
             mode="lines",
-            line=dict(width=espessura, color=cor_hsl),
+            line=dict(width=espessuras[idx], color=cor),
             name=f"{rota["ORIGIN_CITY"]} → {rota["DEST_CITY"]}",
             showlegend=False,
             hovertemplate=(
-                f"<b>%{{text}}</b><br>"+
-                f"{config["title"]}: {rota[config["col"]]:.1f} {config["unit"]}<br>"+
+                f"<b>{rota["ORIGIN_CITY"]} → {rota["DEST_CITY"]}</b><br>"+
+                f"Atraso Médio: {rota["DELAY_OVERALL"]:.1f} min<br>"+
+                f"{config["title"]}: {rota[config["col"]]:.3f} {config["unit"]}<br>"+
                 f"Hora Média: {rota["TIME_HOUR"]:.1f}h<br>"+
                 f"Total de Voos: {rota["TOTAL_VOOS"]}<br>"+
-                f"Espessura: {espessura:.1f}<br>"+
+                f"Distância: {rota["DISTANCE"]:.0f} milhas<br>"+
                 "<extra></extra>"
-            ),
-            text=f"{rota["ORIGIN_CITY"]} → {rota["DEST_CITY"]}"
+            )
         ))
-    
+
+def _adicionar_marcadores_comuns(fig, rotas_data):
     fig.add_trace(go.Scattergeo(
         lon=rotas_data["ORIGIN_LON"],
         lat=rotas_data["ORIGIN_LAT"],
         mode="markers",
-        marker=dict(size=8, color="green", symbol="circle", line=dict(width=1, color="white")),
+        marker=dict(size=7, color="green", symbol="circle", line=dict(width=1, color="white")),
         text=rotas_data["ORIGIN_CITY"],
         name="Origem",
-        hovertemplate="<b>%{text}</b><br><i>Aeroporto de Origem</i><extra></extra>"
+        hovertemplate="<b>%{text}</b><br><i>Aeroporto de Origem</i><extra></extra>",
+        showlegend=False
     ))
     
     fig.add_trace(go.Scattergeo(
         lon=rotas_data["DEST_LON"],
         lat=rotas_data["DEST_LAT"],
         mode="markers",
-        marker=dict(size=8, color="red", symbol="circle", line=dict(width=1, color="white")),
+        marker=dict(size=7, color="red", symbol="circle", line=dict(width=1, color="white")),
         text=rotas_data["DEST_CITY"],
         name="Destino",
-        hovertemplate="<b>%{text}</b><br><i>Aeroporto de Destino</i><extra></extra>"
+        hovertemplate="<b>%{text}</b><br><i>Aeroporto de Destino</i><extra></extra>",
+        showlegend=False
     ))
+
+def _adicionar_destaque_cidades(fig):
+    cidades_destaque = {
+        "Chicago": {"lat": 41.8781, "lon": -87.6298},
+        "Denver": {"lat": 39.7392, "lon": -104.9903},
+        "Atlanta": {"lat": 33.7490, "lon": -84.3880},
+        "Dallas": {"lat": 32.7767, "lon": -96.7970}
+    }
     
+    for cidade, coords in cidades_destaque.items():
+        fig.add_trace(go.Scattergeo(
+            lon=[coords["lon"]],
+            lat=[coords["lat"]],
+            mode="markers+text",
+            marker=dict(
+                size=5, 
+                color="#FFD700", 
+                symbol="star", 
+                line=dict(width=3, color="#FF8C00")
+            ),
+            text=[cidade],
+            textposition="top center",
+            textfont=dict(size=12, color="#000", family="Arial Black"),
+            name="Cidade Crítica",
+            hovertemplate=f"<b>⭐ {cidade}</b><br>"+
+                         f"<i>Cidade com métricas críticas</i><br>"+
+                         f"• 1.2x mais problemas operacionais<br>"+
+                         f"• Cancelamentos e desvios elevados<extra></extra>",
+            showlegend=False
+        ))
+
+def _adicionar_marcadores_estados(fig):
+    estados_centros = {
+        "CA": {"lon": -119.4, "lat": 36.7, "nome": "Califórnia"},
+        "FL": {"lon": -81.5, "lat": 27.9, "nome": "Flórida"},
+        "TX": {"lon": -99.9, "lat": 31.0, "nome": "Texas"},
+        "CO": {"lon": -105.5, "lat": 39.0, "nome": "Colorado"}
+    }
+    
+    for estado, dados in estados_centros.items():
+        fig.add_trace(go.Scattergeo(
+            lon=[dados["lon"]],
+            lat=[dados["lat"]],
+            mode="markers+text",
+            marker=dict(
+                size=35,
+                color="rgba(255, 100, 100, 0.25)",
+                symbol="hexagon",
+                line=dict(width=2, color="rgba(255, 50, 50, 0.6)")
+            ),
+            text=[estado],
+            textfont=dict(size=14, color="rgba(200, 0, 0, 0.8)", family="Arial Black"),
+            textposition="middle center",
+            name=f"Estado Crítico: {dados["nome"]}",
+            showlegend=False,
+            hovertemplate=(
+                f"<b>🔴 {dados["nome"]} ({estado})</b><br>"+
+                f"<i>Estado com indicadores críticos</i><br>"+
+                f"• Atraso médio 1.19x maior<br>"+
+                f"• Risco elevado de problemas<extra></extra>"
+            )
+        ))
+
+def _calcular_cor_horario(time_hour):
+    hora_normalizada = time_hour / 23.0
+    hue = 200 + (hora_normalizada * 80)
+    saturation = 60 + (hora_normalizada * 30)
+    if time_hour <= 12:
+        lightness = 30 + (time_hour / 12.0) * 40
+    else:
+        lightness = 70 - ((time_hour - 12) / 11.0) * 40
+    
+    hue = max(0, min(hue, 360))
+    saturation = max(0, min(saturation, 100))
+    lightness = max(0, min(lightness, 100))
+    
+    return f"hsl({hue:.0f}, {saturation:.0f}%, {lightness:.0f}%)"
+
+def _calcular_espessuras(rotas_data, col_metric):
+    min_metric = rotas_data[col_metric].min()
+    max_metric = rotas_data[col_metric].max()
+    
+    if max_metric <= min_metric or pd.isna(min_metric) or pd.isna(max_metric):
+        return [3] * len(rotas_data)
+    
+    espessuras = []
+    for valor in rotas_data[col_metric]:
+        if pd.isna(valor):
+            espessuras.append(3)
+            continue
+        metric_normalizada = (valor - min_metric) / (max_metric - min_metric)
+        espessura = 1.5 + (metric_normalizada ** 1.5) * 7
+        espessuras.append(max(1.5, min(espessura, 8.5)))
+    
+    return espessuras
+
+def _atualizar_layout(fig, config, altura):
     subtitle_text = (
-        f"🎨 Azul claro = madrugada ⭢ Azul escuro = noite | "+
-        f"📏 Espessura: atraso médio | "+
+        f"🎨 Cor: Hora média do voo | "+
+        f"📏 Espessura: {config["title"]} | "+
         f"🟢 Origem | 🔴 Destino"
+    )
+    
+    destaque_text = (
+        f"<br><sub>⭐ <b>Cidades críticas:</b> Chicago, Denver, Atlanta, Dallas/Fort Worth (1.2x mais problemas) | "+
+        f"🔴 <b>Estados críticos:</b> CA, FL, TX, CO (Atraso 1.19x maior)</sub>"
     )
     
     fig.update_layout(
         title=dict(
-            text=f"<b>As {top_n} rotas com maior atraso</b><br>"+
-                 f"<sub>{subtitle_text}</sub>",
+            text=f"<b>Principais Rotas Aéreas - {config["title"]}</b><br>"+
+                 f"<sub>{subtitle_text}</sub>"+
+                 f"{destaque_text}",
             x=0.5,
-            xanchor="center"
+            xanchor="center",
+            font=dict(size=14)
         ),
         geo=dict(
             scope="usa",
             projection_type="albers usa",
             showland=True,
-            landcolor="rgb(245, 245, 240)",
+            landcolor="rgb(243, 243, 238)",
             showlakes=True,
-            lakecolor="rgb(255, 255, 255)",
+            lakecolor="rgb(220, 235, 255)",
             showsubunits=True,
-            subunitcolor="rgb(217, 217, 217)",
+            subunitcolor="rgb(200, 200, 200)",
+            subunitwidth=0.5,
+            showcoastlines=True,
+            coastlinecolor="rgb(180, 180, 180)",
+            coastlinewidth=0.5,
+            bgcolor="rgba(255,255,255,0.1)",
         ),
         height=altura,
-        margin=dict(l=0, r=0, t=80, b=0),
-        legend=dict(
-            x=0.02,
-            y=0.98,
-            bgcolor="rgba(255,255,255,0.7)",
-            bordercolor="rgba(0,0,0,0.5)",
-            borderwidth=1
+        margin=dict(l=0, r=0, t=120, b=0),
+        showlegend=False,
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=12,
+            font_family="Arial"
         ),
-        template=plotly_template # Aplicar template
+        template=plotly_template
     )
+
+def criar_mapa_rotas_avancado(df, top_n=30, altura=600, selected_metric="avg_delay_per_distance"):
+    config = METRIC_CONFIG.get(selected_metric, METRIC_CONFIG["avg_delay_per_distance"])
+    
+    required_cols = ["ORIGIN_CITY", "DEST_CITY", "ORIGIN_LAT", "ORIGIN_LON", "DEST_LAT", "DEST_LON", "DISTANCE"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    
+    if missing_cols:
+        return _create_error_figure(f"Dados de coordenadas ou distância não disponíveis: {", ".join(missing_cols)}", altura)
+    
+    rotas_data = _processar_dados_rotas(df, config, top_n)
+    
+    if rotas_data.empty:
+        return _create_error_figure("Nenhuma rota válida encontrada", altura)
+    
+    fig = go.Figure()
+    
+    _adicionar_marcadores_estados(fig)
+    
+    espessuras = _calcular_espessuras(rotas_data, config["col"])
+    
+    _adicionar_rotas(fig, rotas_data, espessuras, config)
+    
+    _adicionar_marcadores_comuns(fig, rotas_data)
+    
+    _adicionar_destaque_cidades(fig)
+    
+    _atualizar_layout(fig, config, altura)
+    
     return fig
 
 # --- Layout do Streamlit ---
@@ -335,12 +468,13 @@ st.markdown("### Análise de Distribuições")
 
 selected_metric = st.radio(
     "Selecione a métrica para análise:",
-    options=["avg_delay", "delay_count", "cancelled_count", "diverted_count"],
+    options=["avg_delay", "delay_count", "cancelled_count", "diverted_count", "avg_delay_per_distance"],
     format_func=lambda x: {
         "avg_delay": "⏱️ Média de Atraso",
         "delay_count": "🔢 Quantidade de Atrasos",
         "cancelled_count": "❌ Quantidade de Cancelamentos",
-        "diverted_count": "🔄 Quantidade de Desvios"
+        "diverted_count": "🔄 Quantidade de Desvios",
+        "avg_delay_per_distance": "⏱️ Atraso Médio por Distância"
     }[x],
     horizontal=True
 )
@@ -456,3 +590,4 @@ st.markdown(
     "</div>", 
     unsafe_allow_html=True
 )
+
